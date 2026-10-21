@@ -1,19 +1,25 @@
 package vocab;
 
+import java.util.Arrays;
+
 public class Word {
 
-    private String spelling;
-    private String[] meanings;
-    private int joinDay;
+    private final String spelling;
+    private final String[] meanings;
+    private final int joinDay;
     private int lastDay;
     private int reviewCount;
     private boolean archived;
 
+    public Word(String spelling, int joinDay) {
+        this(spelling, new String[]{}, joinDay);
+    }
+
     public Word(String spelling, String[] meanings, int joinDay) {
-        this.spelling = spelling;
-        this.meanings = meanings;
-        this.joinDay  = joinDay;
-        lastDay = joinDay;
+        this.spelling = normalizeSpelling(spelling);
+        this.meanings  = copyMeanings(meanings);
+        this.joinDay   = normalizeJoinDay(joinDay);
+        this.lastDay     = this.joinDay;
         reviewCount   = 0;
         archived      = false;
     }
@@ -24,7 +30,7 @@ public class Word {
     }
 
     public String[] getMeanings() {
-        return meanings;
+        return Arrays.copyOf(meanings, meanings.length);
     }
 
     public int getJoinDay() {
@@ -51,5 +57,20 @@ public class Word {
 
     void markArchived() {
         archived = true;
+    }
+
+    // assistants
+    private static String normalizeSpelling(String s) {
+        if (s == null || s.isBlank()) return "unknown";
+        return s;
+    }
+
+    private static String[] copyMeanings(String[] m) {
+        if (m == null) return new String[]{};
+        return Arrays.copyOf(m, m.length);
+    }
+
+    private static int normalizeJoinDay(int day) {
+        return Math.max(day, 1);
     }
 }
