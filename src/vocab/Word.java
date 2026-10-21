@@ -16,10 +16,10 @@ public class Word {
     }
 
     public Word(String spelling, String[] meanings, int joinDay) {
-        this.spelling = normalizeSpelling(spelling);
-        this.meanings  = copyMeanings(meanings);
-        this.joinDay   = normalizeJoinDay(joinDay);
-        this.lastDay     = this.joinDay;
+        this.spelling = requireValidSpelling(spelling);
+        this.meanings = requireValidMeanings(meanings);
+        this.joinDay  = requireValidJoinDay(joinDay);
+        this.lastDay  = this.joinDay;
         reviewCount   = 0;
         archived      = false;
     }
@@ -60,17 +60,24 @@ public class Word {
     }
 
     // assistants
-    private static String normalizeSpelling(String s) {
-        if (s == null || s.isBlank()) return "unknown";
+    private static String requireValidSpelling(String s) {
+        if (s == null || s.isBlank()) {
+            throw new IllegalArgumentException("spelling must not be blank");
+        }
         return s;
     }
 
-    private static String[] copyMeanings(String[] m) {
-        if (m == null) return new String[]{};
+    private static String[] requireValidMeanings(String[] m) {
+        if (m == null) {
+            throw new IllegalArgumentException("meanings must not be null");
+        }
         return Arrays.copyOf(m, m.length);
     }
 
-    private static int normalizeJoinDay(int day) {
-        return Math.max(day, 1);
+    private static int requireValidJoinDay(int day) {
+        if (day < 1) {
+            throw new IllegalArgumentException("joinDay must be >= 1, got " + day);
+        }
+        return day;
     }
 }
