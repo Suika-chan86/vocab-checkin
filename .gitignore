@@ -1,6 +1,7 @@
 # IntelliJ IDEA
 .idea/
 *.iml
+!vocab_checkin.iml
 out/
 
 # Compiled class files
