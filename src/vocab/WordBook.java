@@ -47,10 +47,10 @@ public class WordBook {
             return "\"The secret of getting ahead is getting started.\" — Mark Twain";                  // 空本直接返回，不进循环
         }
 
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (int i = 0; i < size; i++) {
             if (i > 0) {
-                result += "\n\n";          // 只在块之间加分隔，避免末尾多空行
+                result.append("\n\n");          // 只在块之间加分隔，避免末尾多空行
             }
 
             // 处理特殊字段
@@ -58,7 +58,7 @@ public class WordBook {
             if (words[i].getMeanings().length == 0) {
                 meaningText = "n/a";
             } else {
-                meaningText = String.join(" / ", words[i].getMeanings());
+                meaningText = String.join("/", words[i].getMeanings());
             }
             String lastLine;
             if (words[i].isArchived()) {
@@ -69,14 +69,15 @@ public class WordBook {
             }
 
             // 这里拼第 i 个词的块
-            result += words[i].getSpelling() + "\n"
-                    + "  meanings : " + meaningText + "\n"
-                    + "  joined   : " + words[i].getJoinDay() + "\n"
-                    + "  reviewed : " + words[i].getReviewCount() + "\n"
-                    + lastLine
+            result
+                .append(words[i].getSpelling()).append("\n")
+                .append("  meanings : ").append(meaningText).append("\n")
+                .append("  joined   : ").append(words[i].getJoinDay()).append("\n")
+                .append("  reviewed : ").append(words[i].getReviewCount()).append("\n")
+                .append(lastLine)
             ;
         }
-        return result;
+        return result.toString();
     }
 
     private int dueDay(Word w) {
