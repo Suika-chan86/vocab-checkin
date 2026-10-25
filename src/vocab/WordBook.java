@@ -15,6 +15,16 @@ public class WordBook {
     }
 
     public void add(Word w) {
+        if (w == null) {
+            throw new IllegalArgumentException(
+                    "word must not be null"
+            );
+        }
+        if (find(w.getSpelling()) != null) {
+            throw new IllegalArgumentException(
+                    "duplicate spelling: " + w.getSpelling()
+            );
+        }
         if (size == words.length) {
             words = Arrays.copyOf(words, words.length * 2);
         }

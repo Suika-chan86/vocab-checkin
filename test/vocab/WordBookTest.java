@@ -205,4 +205,45 @@ public class WordBookTest {
     void emptyBookReturnsEmptyArray() {
         assertEquals(0, new WordBook().toArray().length);
     }
+
+    @Test
+    void addRejectsNullWord() {
+        WordBook book = new WordBook();
+        assertThrows(IllegalArgumentException.class, () -> book.add(null));
+    }
+
+    @Test
+    void addRejectsDuplicateSpelling() {
+        WordBook book = new WordBook();
+        Word original = new Word("apple", new String[]{"m"}, 1);
+        book.add(original);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> book.add(new Word("apple", new String[]{"m"}, 2)));
+
+        assertEquals(1, book.toArray().length);
+        assertSame(original, book.find("apple"));
+    }
+
+    @Test
+    void addAllowsDistinctSpellings() {
+        WordBook book = new WordBook();
+        book.add(new Word("apple", new String[]{"m"}, 1));
+        book.add(new Word("banana", new String[]{"m"}, 1));
+
+        assertEquals(2, book.toArray().length);
+    }
+
+    @Test
+    void addStillWorksAfterDuplicateRejection() {
+        WordBook book = new WordBook();
+        book.add(new Word("apple", new String[]{"m"}, 1));
+        assertThrows(IllegalArgumentException.class,
+                () -> book.add(new Word("apple", new String[]{"m"}, 1)));
+
+        book.add(new Word("banana", new String[]{"m"}, 1));
+
+        assertEquals(2, book.toArray().length);
+        assertNotNull(book.find("banana"));
+    }
 }
