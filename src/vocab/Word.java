@@ -36,6 +36,15 @@ public class Word {
                     "reviewCount must be >= 0, got " + reviewCount
             );
         }
+        if (reviewCount == 0 && lastDay != joinDay) {
+            throw new IllegalArgumentException(
+                    "no reviews but lastDay = " + lastDay + ", joinDay = " + joinDay);
+        }
+        if (reviewCount > 0 && lastDay <= joinDay) {
+            throw new IllegalArgumentException(
+                    "reviewed " + reviewCount + " time(s) but lastDay = " + lastDay
+                            + " <= joinDay = " + joinDay);
+        }
         // 赋值 lastDay / reviewCount / archived
         this.lastDay = lastDay;
         this.reviewCount = reviewCount;

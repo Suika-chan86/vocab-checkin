@@ -141,4 +141,22 @@ public class WordBookTest {
         assertThrows(IllegalArgumentException.class,
                 () -> new Word("apple", new String[]{"m"}, 5, 5, -1, false));
     }
+
+    @Test
+    void restoreRejectsLastDayMismatchWhenNoReviews() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word("apple", new String[]{"m"}, 5, 6, 0, false));
+    }
+
+    @Test
+    void restoreRejectsUnchangedLastDayWhenReviewed() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word("apple", new String[]{"m"}, 5, 5, 1, false));
+    }
+
+    @Test
+    void restoreAcceptsFreshState() {
+        assertDoesNotThrow(
+                () -> new Word("apple", new String[]{"m"}, 5, 5, 0, false));
+    }
 }
