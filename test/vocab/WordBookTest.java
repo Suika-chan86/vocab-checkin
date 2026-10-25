@@ -159,4 +159,50 @@ public class WordBookTest {
         assertDoesNotThrow(
                 () -> new Word("apple", new String[]{"m"}, 5, 5, 0, false));
     }
+
+    @Test
+    void toArrayReturnsSnapshotInInsertionOrder() {
+        WordBook book = new WordBook();
+        Word a = new Word("apple", new String[]{"m"}, 1);
+        Word b = new Word("banana", new String[]{"m"}, 2);
+        book.add(a);
+        book.add(b);
+
+        Word[] snapshot = book.toArray();
+
+        assertEquals(2, snapshot.length);
+        assertSame(a, snapshot[0]);
+        assertSame(b, snapshot[1]);
+    }
+
+    @Test
+    void modifyingSnapshotDoesNotAffectBook() {
+        WordBook book = new WordBook();
+        Word a = new Word("apple", new String[]{"m"}, 1);
+        book.add(a);
+
+        Word[] snapshot = book.toArray();
+        snapshot[0] = null;
+
+        assertSame(a, book.find("apple"));
+    }
+
+    @Test
+    void toArrayIncludesWordsAfterGrowth() {
+        WordBook book = new WordBook();
+        for (int i = 0; i < 15; i++) {
+            book.add(new Word("w" + i, new String[]{"m"}, 1));
+        }
+
+        Word[] snapshot = book.toArray();
+
+        assertEquals(15, snapshot.length);
+        assertEquals("w0", snapshot[0].getSpelling());
+        assertEquals("w14", snapshot[14].getSpelling());
+    }
+
+    @Test
+    void emptyBookReturnsEmptyArray() {
+        assertEquals(0, new WordBook().toArray().length);
+    }
 }

@@ -1,5 +1,6 @@
 package vocab;
 
+import java.lang.reflect.Array;
 import java.util.Arrays;
 
 public class WordBook {
@@ -84,5 +85,10 @@ public class WordBook {
         int n = w.getReviewCount();
         int offset = (n <= 5) ? TABLE[n] : 30;
         return w.getLastDay() + offset;
+    }
+
+    Word[] toArray() {
+        // 返回 words 中有效元素的副本
+        return Arrays.copyOf(words, size);
     }
 }
