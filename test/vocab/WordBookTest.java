@@ -89,4 +89,34 @@ public class WordBookTest {
         assertTrue(occupiedOut.contains("archived"));
         assertFalse(occupiedOut.endsWith("\n"));
     }
+
+    @Test
+    void nullSpellingIsRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word(null, new String[]{"m"}, 1));
+    }
+
+    @Test
+    void blankSpellingIsRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word("   ", new String[]{"m"}, 1));
+    }
+
+    @Test
+    void nullMeaningsIsRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word("apple", null, 1));
+    }
+
+    @Test
+    void joinDayBelowOneIsRejected() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word("apple", new String[]{"m"}, 0));
+    }
+
+    @Test
+    void emptyMeaningsIsAllowed() {
+        assertDoesNotThrow(
+                () -> new Word("apple", new String[]{}, 1));
+    }
 }
