@@ -24,6 +24,24 @@ public class Word {
         archived      = false;
     }
 
+    Word(String spelling, String[] meanings, int joinDay, int lastDay, int reviewCount, boolean archived) {
+        this(spelling, meanings, joinDay);    // 前三个字段复用普通构造器
+        if (lastDay < joinDay) {    // 校验 lastDay >= joinDay
+            throw new IllegalArgumentException(
+                    "lastDay must be >= joinDay, got lastDay = " + lastDay + ", joinDay = " + joinDay
+            );
+        }
+        if (reviewCount < 0) {    // 校验 reviewCount >= 0
+            throw new IllegalArgumentException(
+                    "reviewCount must be >= 0, got " + reviewCount
+            );
+        }
+        // 赋值 lastDay / reviewCount / archived
+        this.lastDay = lastDay;
+        this.reviewCount = reviewCount;
+        this.archived = archived;
+    }
+
     // getters
     public String getSpelling() {
         return spelling;

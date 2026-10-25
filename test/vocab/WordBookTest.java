@@ -119,4 +119,26 @@ public class WordBookTest {
         assertDoesNotThrow(
                 () -> new Word("apple", new String[]{}, 1));
     }
+
+    @Test
+    void restoreKeepsFullState() {
+        Word w = new Word("apple", new String[]{"m"}, 5, 12, 2, true);
+
+        assertEquals(5, w.getJoinDay());
+        assertEquals(12, w.getLastDay());
+        assertEquals(2, w.getReviewCount());
+        assertTrue(w.isArchived());
+    }
+
+    @Test
+    void restoreRejectsLastDayBeforeJoinDay() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word("apple", new String[]{"m"}, 5, 4, 0, false));
+    }
+
+    @Test
+    void restoreRejectsNegativeReviewCount() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new Word("apple", new String[]{"m"}, 5, 5, -1, false));
+    }
 }
