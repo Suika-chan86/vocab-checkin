@@ -1,9 +1,6 @@
 package vocab;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 
@@ -13,14 +10,20 @@ public class WordStorage {
 
     public WordStorage(File file) {
         this.file = file;
+        if (file == null) {
+            throw new IllegalArgumentException("file must not be null");
+        }
     }
 
     public WordBook load() throws IOException {
+
         WordBook book = new WordBook();
         if (!file.exists()) return book;
+
         try (BufferedReader in = new BufferedReader(new FileReader(file, StandardCharsets.UTF_8))){
             int lineNumber = 0;
             String line;
+
             while ((line = in.readLine()) != null) {
                 // 剥除BOM
                 lineNumber++;
@@ -39,12 +42,89 @@ public class WordStorage {
                     );
                 }
             }
+
         }
         return book;
+
     }
 
     public void save(WordBook book) throws IOException {
+        if (book == null) {
+            throw new IllegalArgumentException("book must not be null");
+        }
 
+        Word[] words = book.toArray();      // 只读一次快照
+
+        // 1. 只校验，不碰文件
+        for (Word w : words) {
+            validateForSave(w);
+        }
+
+        // 2. 目录
+        File parent = file.getParentFile();
+        if (parent != null && !parent.exists()) {
+            if(!parent.mkdirs()) {
+                throw new IOException(
+                        "failed to create directory: " + parent
+                );
+            }
+        }
+
+        // 3. 打开文件（截断/覆盖可能存在的原文件）
+        try (PrintWriter out = new PrintWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+
+            out.print("# vocab-checkin v1\n");
+
+            for (Word w : words) {
+                writeWord(out, w);
+            }
+
+            if (out.checkError()) {
+                throw new IOException("failed to write " + file);
+            }
+        }
+
+    }
+
+    private void validateForSave(Word w) {
+        String spelling = w.getSpelling();
+        if (spelling.contains("|")  ||
+            spelling.contains("\n") ||
+            spelling.contains("\r") ||
+            spelling.startsWith("#"))
+        {
+            throw new IllegalArgumentException(
+                    "spelling should not contains '|' '\\n' '\\r' '#' or starts with '#'"
+            );
+        }
+
+        String[] meanings = w.getMeanings();
+        for (String meaning : meanings) {
+            if (meaning.contains("|")  ||
+                meaning.contains("/")  ||
+                meaning.contains("\n") ||
+                meaning.contains("\r"))
+            {
+                throw new IllegalArgumentException(
+                        "meaning should not contains following characters: '|' '/' '\\n' '\\r'"
+                );
+            }
+        }
+    }
+
+    private void writeWord(PrintWriter out, Word word) {
+        out.print(word.getSpelling());
+        out.print("|");
+        out.print(String.join("/", word.getMeanings()));
+        out.print("|");
+        out.print(word.getJoinDay());
+        out.print("|");
+        out.print(word.getLastDay());
+        out.print("|");
+        out.print(word.getReviewCount());
+        out.print("|");
+        out.print(word.isArchived());
+        out.print("\n");
     }
 
     private Word parseLine(String line) {

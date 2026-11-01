@@ -271,4 +271,32 @@ public class WordBookTest {
 
         assertEquals(2, book.toArray().length);
     }
+
+    @Test
+    void saveThenLoadRestoresMeanings() throws IOException {
+        File file = tempDir.resolve("words.txt").toFile();
+        WordBook book = new WordBook();
+        book.add(new Word("apple", new String[]{"苹果", "苹果树"}, 1));
+
+        WordStorage storage = new WordStorage(file);
+        storage.save(book);
+
+        Word restored = storage.load().find("apple");
+        assertArrayEquals(new String[]{"苹果", "苹果树"}, restored.getMeanings());
+    }
+
+    @Test
+    void saveWritesEmptyMeaningsAsEmptyField() throws IOException {
+        File file = tempDir.resolve("words.txt").toFile();
+
+        WordBook book = new WordBook();
+        book.add(new Word("banana", new String[]{}, 3));
+
+        new WordStorage(file).save(book);
+
+        String content = Files.readString(file.toPath(), StandardCharsets.UTF_8);
+        assertTrue(content.contains("banana||3|3|0|false"));
+        Word restored = new WordStorage(file).load().find("banana");
+        assertEquals(0, restored.getMeanings().length);
+    }
 }
