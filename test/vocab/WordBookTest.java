@@ -1,6 +1,13 @@
 package vocab;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -245,5 +252,23 @@ public class WordBookTest {
 
         assertEquals(2, book.toArray().length);
         assertNotNull(book.find("banana"));
+    }
+
+    @TempDir
+    Path tempDir;
+
+    @Test
+    void loadsValidFile() throws IOException {
+        File file = tempDir.resolve("words.txt").toFile();
+
+        Files.writeString(file.toPath(),
+                "# vocab-checkin v1\n"
+                        + "apple|苹果/苹果树|1|1|0|false\n"
+                        + "banana||3|3|0|true\n",
+                StandardCharsets.UTF_8);
+
+        WordBook book = new WordStorage(file).load();
+
+        assertEquals(2, book.toArray().length);
     }
 }
