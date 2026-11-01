@@ -49,17 +49,16 @@ public class WordStorage {
     }
 
     public void save(WordBook book) throws IOException {
+
         if (book == null) {
             throw new IllegalArgumentException("book must not be null");
         }
 
         Word[] words = book.toArray();      // 只读一次快照
-
         // 1. 只校验，不碰文件
         for (Word w : words) {
             validateForSave(w);
         }
-
         // 2. 目录
         File parent = file.getParentFile();
         if (parent != null && !parent.exists()) {
@@ -69,16 +68,12 @@ public class WordStorage {
                 );
             }
         }
-
         // 3. 打开文件（截断/覆盖可能存在的原文件）
         try (PrintWriter out = new PrintWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
-
             out.print("# vocab-checkin v1\n");
-
             for (Word w : words) {
                 writeWord(out, w);
             }
-
             if (out.checkError()) {
                 throw new IOException("failed to write " + file);
             }
@@ -87,6 +82,7 @@ public class WordStorage {
     }
 
     private void validateForSave(Word w) {
+
         String spelling = w.getSpelling();
         if (spelling.contains("|")  ||
             spelling.contains("\n") ||
@@ -175,5 +171,6 @@ public class WordStorage {
         }
 
         return new Word(spelling, meanings, numbers[0], numbers[1], numbers[2], archived);
+
     }
 }

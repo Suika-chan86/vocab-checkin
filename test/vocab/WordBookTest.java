@@ -299,4 +299,74 @@ public class WordBookTest {
         Word restored = new WordStorage(file).load().find("banana");
         assertEquals(0, restored.getMeanings().length);
     }
+
+    @Test
+    void saveThenLoadRestoresCompleteState() throws IOException {
+        File file = tempDir.resolve("words.txt").toFile();
+
+        WordBook original = new WordBook();
+        original.add(new Word("apple", new String[]{"苹果", "苹果树"}, 1));
+        original.add(new Word("banana", new String[]{"香蕉"}, 3, 10, 2, false));
+        original.add(new Word("cherry", new String[]{"樱桃"}, 1, 5, 3, true));
+        original.add(new Word("date", new String[]{}, 2));
+
+        WordStorage storage = new WordStorage(file);
+        storage.save(original);
+        WordBook loaded = storage.load();
+
+        Word[] before = original.toArray();
+        Word[] after = loaded.toArray();
+
+        assertEquals(before.length, after.length);
+
+        for (int i = 0; i < before.length; i++) {
+            assertWordEquals(before[i], after[i]);
+        }
+    }
+
+    @Test
+    void emptyBookRoundTrip() throws IOException {
+        File file = tempDir.resolve("empty.txt").toFile();
+
+        WordBook original = new WordBook();
+        WordStorage storage = new WordStorage(file);
+
+        storage.save(original);
+        WordBook loaded = storage.load();
+
+        assertEquals(0, loaded.toArray().length);
+    }
+
+    @Test
+    void saveTwiceKeepsOnlyLatestState() throws IOException {
+        // 第一次 save 两个词，第二次 save 一个词
+        // load 后长度必须是 1
+        File file = tempDir.resolve("twice.txt").toFile();
+        WordStorage storage = new WordStorage(file);
+
+        WordBook first = new WordBook();
+        first.add(new Word("apple", new String[]{"苹果"}, 1));
+        first.add(new Word("banana", new String[]{"香蕉"}, 1));
+        storage.save(first);
+
+        WordBook second = new WordBook();
+        second.add(new Word("cherry", new String[]{"樱桃"}, 1));
+        storage.save(second);
+
+        WordBook loaded = storage.load();
+
+        assertEquals(1, loaded.toArray().length);
+        assertNotNull(loaded.find("cherry"));
+        assertNull(loaded.find("apple"));
+        assertNull(loaded.find("banana"));
+    }
+
+    private static void assertWordEquals(Word expected, Word actual) {
+        assertEquals(expected.getSpelling(), actual.getSpelling());
+        assertArrayEquals(expected.getMeanings(), actual.getMeanings());
+        assertEquals(expected.getJoinDay(), actual.getJoinDay());
+        assertEquals(expected.getLastDay(), actual.getLastDay());
+        assertEquals(expected.getReviewCount(), actual.getReviewCount());
+        assertEquals(expected.isArchived(), actual.isArchived());
+    }
 }
