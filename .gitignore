@@ -7,6 +7,9 @@ out/
 # Compiled class files
 *.class
 
+# User data
+data/
+
 # OS
 .DS_Store
 Thumbs.db

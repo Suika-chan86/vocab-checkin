@@ -361,6 +361,65 @@ public class WordBookTest {
         assertNull(loaded.find("banana"));
     }
 
+    @Test
+    void nullArgumentsAreRejected() {
+        WordBook book = new WordBook();
+        Word w = wordJoinedOn("apple", 1);
+        book.add(w);
+
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () -> book.find(null)),
+                () -> assertThrows(IllegalArgumentException.class, () -> book.isDue(null, 1)),
+                () -> assertThrows(IllegalArgumentException.class, () -> book.markReviewed(null, 1)),
+                () -> assertThrows(IllegalArgumentException.class, () -> book.archive(null))
+        );
+    }
+
+    @Test
+    void wordsOutsideTheBookAreRejected() {
+        WordBook book = new WordBook();
+        book.add(wordJoinedOn("apple", 1));
+        Word stranger = wordJoinedOn("apple", 1);   // 同拼写，不同实例
+
+        assertAll(
+                () -> assertThrows(IllegalArgumentException.class, () -> book.markReviewed(stranger, 6)),
+                () -> assertThrows(IllegalArgumentException.class, () -> book.archive(stranger))
+        );
+    }
+
+    @Test
+    void invalidReviewsAreRejected() {
+        WordBook book = new WordBook();
+
+        Word archived = wordJoinedOn("archived", 1);
+        book.add(archived);
+        book.archive(archived);
+
+        Word notDue = wordJoinedOn("notdue", 5);    // lastDay=5, dueDay=6
+        book.add(notDue);
+
+        Word reviewed = wordJoinedOn("reviewed", 1);
+        book.add(reviewed);
+        book.markReviewed(reviewed, 6);             // lastDay=6
+
+        assertAll(
+                () -> assertThrows(IllegalStateException.class, () -> book.markReviewed(archived, 2)),
+                () -> assertThrows(IllegalStateException.class, () -> book.markReviewed(notDue, 5)),
+                () -> assertThrows(IllegalArgumentException.class, () -> book.markReviewed(reviewed, 5))
+        );
+    }
+
+    @Test
+    void archiveIsIdempotent() {
+        WordBook book = new WordBook();
+        Word w = wordJoinedOn("apple", 1);
+        book.add(w);
+
+        book.archive(w);
+        assertDoesNotThrow(() -> book.archive(w));
+        assertTrue(w.isArchived());
+    }
+
     private static void assertWordEquals(Word expected, Word actual) {
         assertEquals(expected.getSpelling(), actual.getSpelling());
         assertArrayEquals(expected.getMeanings(), actual.getMeanings());

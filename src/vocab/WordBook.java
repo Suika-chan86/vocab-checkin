@@ -32,6 +32,11 @@ public class WordBook {
     }
 
     public Word find(String spelling) {
+        if (spelling == null) {
+            throw new IllegalArgumentException(
+                    "spelling must not be null"
+            );
+        }
         for (int i = 0; i < size; i++) {
             if (spelling.equals(words[i].getSpelling())) {
                 return words[i];
@@ -41,14 +46,54 @@ public class WordBook {
     }
 
     public boolean isDue(Word w, int today) {
+        if (w == null) {
+            throw new IllegalArgumentException(
+                    "word must not be null"
+            );
+        }
         return today >= dueDay(w) && !w.isArchived();
     }
 
     public void markReviewed(Word w, int today) {
+        if (w == null) {
+            throw new IllegalArgumentException(
+                    "word must not be null"
+            );
+        }
+        if (find(w.getSpelling()) != w) {
+            throw new IllegalArgumentException(
+                    "word is not in this book: " + w.getSpelling()
+            );
+        }
+        if (w.isArchived()) {
+            throw new IllegalStateException(
+                    "cannot review an archived word: " + w.getSpelling()
+            );
+        }
+        if (today < w.getLastDay()) {
+            throw new IllegalArgumentException(
+                    "today must not be before lastDay: today=" + today + ", lastDay=" + w.getLastDay()
+            );
+        }
+        if (today < dueDay(w)) {
+            throw new IllegalStateException(
+                    "word is not due yet: " + w.getSpelling() + ", dueDay=" + dueDay(w) + ", today=" + today
+            );
+        }
         w.recordReviewed(today);
     }
 
     public void archive(Word w) {
+        if (w == null) {
+            throw new IllegalArgumentException(
+                    "word must not be null"
+            );
+        }
+        if (find(w.getSpelling()) != w) {
+            throw new IllegalArgumentException(
+                    "word is not in this book: " + w.getSpelling()
+            );
+        }
         w.markArchived();
     }
 
